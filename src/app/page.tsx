@@ -9,21 +9,22 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import useGetApi from "@/hooks/useGetApi";
 import axios from "axios";
+import { Trip } from "@/app/types";
 
-interface Trip {
-  _id: string;
-  source: string;
-  destination: string;
-  car: string;
+// interface Trip {
+//   _id: string;
+//   source: string;
+//   destination: string;
+//   car: string;
 
-  takofftime: string;
-  available_seats: number;
-  price: number;
-  host: {
-    full_name: string;
-    avatar_url?: string;
-  };
-}
+//   takofftime: string;
+//   available_seats: number;
+//   price: number;
+//   host: {
+//     full_name: string;
+//     avatar_url?: string;
+//   };
+// }
 
 export default function Home() {
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -31,8 +32,7 @@ export default function Home() {
 
   useEffect(() => {
     const getTrips = async () => {
-      // const liveTrips = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/trips`);
-      const liveTrips = await axios.get('http://localhost:5000/api/v1/trips');
+      const liveTrips = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/trips`);
 
       if (liveTrips.status !== 200) {
         throw new Error("Request failed");
@@ -74,7 +74,8 @@ export default function Home() {
             {trips.map((trip) => (
               <Link
                 key={trip._id}
-                href={`/trips/${trip._id}`}
+                // href={`/trip-details`}
+                href={`/trip-details/${trip._id}`}
                 className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6"
               >
                 <div className="flex items-center space-x-4 mb-4">
