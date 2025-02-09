@@ -1,5 +1,4 @@
 'use client'
-import { AuthProvider } from "@/contexts/AuthContext";
 import RecipeReviewCard from "./components/live-trips";
 import Navbar from "./components/Navbar";
 import SeachBar from "./components/searchbar";
@@ -54,7 +53,6 @@ export default function Home() {
 
 
   return (
-    <AuthProvider>
       <div>
         {/* <SeachBar />
       <div className="flex justify-center w-full border">
@@ -124,6 +122,5 @@ export default function Home() {
           )}
         </>
       </div>
-    </AuthProvider>
   );
 }

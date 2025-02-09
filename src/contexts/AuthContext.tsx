@@ -1,3 +1,5 @@
+'use client'
+import axios from 'axios';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 // import { supabase } from '../lib/supabase';
 // import type { User } from '@supabase/supabase-js';
@@ -6,7 +8,7 @@ interface AuthContextType {
     user: null;
     loading: boolean;
     signIn: (email: string, password: string) => Promise<void>;
-    signUp: (email: string, password: string, fullName: string) => Promise<void>;
+    signUp: (data: { email: string; full_name: string; gender: string; password: string; phone: string; username: string }) => Promise<void>;
     signOut: () => Promise<void>;
 }
 
@@ -30,7 +32,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // if (error) throw error;
     };
 
-    const signUp = async (email: string, password: string, fullName: string) => {
+
+
+    const signUp = async ({ email, full_name, gender, password, phone, username }: { email: string; full_name: string; gender: string; password: string; phone: string; username: string }) => {
+        const payload = {
+            email,
+            full_name,
+            gender,
+            password,
+            phone,
+            username,
+        }
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_REGISTER}`, payload, { headers: { "Content-Type": "application/json" } })
+        
         // const { error: signUpError, data } = await supabase.auth.signUp({ 
         //   email, 
         //   password,
