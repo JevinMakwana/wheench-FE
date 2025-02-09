@@ -34,9 +34,9 @@ export default function Home() {
       const liveTrips = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/trips`);
 
       if (liveTrips.status !== 200) {
+        setLoading(false);
         throw new Error("Request failed");
       }
-      console.log('response->>>', liveTrips.data.trips)
       setTrips(liveTrips.data.trips);
       setLoading(false);
     }
@@ -72,7 +72,6 @@ export default function Home() {
             {trips.map((trip) => (
               <Link
                 key={trip._id}
-                // href={`/trip-details`}
                 href={`/trip-details/${trip._id}`}
                 className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6"
               >

@@ -5,9 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 // import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
-// import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 // import { toast } from 'react-hot-toast';
-// import { useAuth } from '../contexts/AuthContext';
 
 const loginSchema = z.object({
     email: z.string().email(),
@@ -17,20 +16,20 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
-    const naviget = useRouter();
-    // const { signIn } = useAuth();
+    const navigate = useRouter();
+    const { signIn } = useAuth();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema),
     });
 
     const onSubmit = async (data: LoginForm) => {
-        // try {
-        //     await signIn(data.email, data.password);
-        //     toast.success('Logged in successfully!');
-        //     navigate.push('/');
-        // } catch (error) {
-        //     toast.error('Invalid email or password');
-        // }
+        try {
+            await signIn(data.email, data.password);
+            // toast.success('Logged in successfully!');
+            navigate.push('/');
+        } catch (error) {
+            // toast.error('Invalid email or password');
+        }
     };
 
     return (

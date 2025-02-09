@@ -1,4 +1,5 @@
 'use client'
+import { cookiesSetItem } from '@/utils/commons';
 import axios from 'axios';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 // import { supabase } from '../lib/supabase';
@@ -28,8 +29,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     //   }, []);
 
     const signIn = async (email: string, password: string) => {
-        // const { error } = await supabase.auth.signInWithPassword({ email, password });
-        // if (error) throw error;
+        setLoading(true);
+        try {
+            const response: any = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_LOGIN}`, {
+                email,
+                password
+            });
+    
+            if (response.data.token) {
+                cookiesSetItem('token', response.data.token);
+                setUser(response.data.user); // Update user state
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+        }
+        setLoading(false);
     };
 
 
@@ -44,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             username,
         }
         const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_REGISTER}`, payload, { headers: { "Content-Type": "application/json" } })
-        
+
         // const { error: signUpError, data } = await supabase.auth.signUp({ 
         //   email, 
         //   password,
