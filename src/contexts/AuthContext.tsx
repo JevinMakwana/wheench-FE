@@ -19,14 +19,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<null>(null);
     const [loading, setLoading] = useState(true);
 
-    //   useEffect(() => {
-    //     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-    //       setUser(session?.user ?? null);
-    //       setLoading(false);
-    //     });
+      useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser)); // Restore user from localStorage
+        }
+        setLoading(false);
+      }, []);
 
-    //     return () => subscription.unsubscribe();
-    //   }, []);
+    const storeUserInfo = (data:any) => {
+        if (data.token) {
+            cookiesSetItem("authToken", data.token);
+        }
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store user details in localStorage
+        setUser(data.user); // Update user state
+    }
 
     const signIn = async (email: string, password: string) => {
         setLoading(true);
@@ -35,18 +42,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email,
                 password
             });
-    
+
             if (response.data.token) {
-                cookiesSetItem('token', response.data.token);
-                setUser(response.data.user); // Update user state
+                storeUserInfo(response.data);
             }
         } catch (error) {
             console.error("Login error:", error);
         }
         setLoading(false);
     };
-
-
 
     const signUp = async ({ email, full_name, gender, password, phone, username }: { email: string; full_name: string; gender: string; password: string; phone: string; username: string }) => {
         const payload = {
@@ -58,6 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             username,
         }
         const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_REGISTER}`, payload, { headers: { "Content-Type": "application/json" } })
+        if (response.data.token) {
+            storeUserInfo(response.data);
+        }
 
         // const { error: signUpError, data } = await supabase.auth.signUp({ 
         //   email, 
@@ -78,8 +85,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const signOut = async () => {
-        // const { error } = await supabase.auth.signOut();
-        // if (error) throw error;
+        cookiesSetItem("token", "");
+        localStorage.removeItem("user");
+        setUser(null);
     };
 
     return (

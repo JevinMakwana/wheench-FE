@@ -14,11 +14,12 @@ export interface Trip {
     destination: string;
     car: string;
   
-    takofftime: string;
+    takeofftime: string;
     available_seats: number;
     price: number;
-    host: {
-      full_name: string;
+    hostInfo: {
+      full_name?: string;
+      username: string;
       avatar_url?: string;
     };
   }

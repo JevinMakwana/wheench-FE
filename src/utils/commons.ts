@@ -5,7 +5,7 @@ export const cookiesGetItem = (key: string) => {
   return item;
 };
 
-export const cookiesSetItem = (key: string, value: string) => {
+export const cookiesSetItem = (key: string, value: string, ) => {
   Cookies.set(key, value, { path: "/", domain: window.location.hostname });
 };
 
