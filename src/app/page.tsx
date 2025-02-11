@@ -75,7 +75,7 @@ export default function Home() {
           {trips.map((trip) => (
             <Link
               key={trip._id}
-              href={`/trip-details/${trip._id}`}
+              href={`/trip/trip-details/${trip._id}`}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6"
             >
               <div className="flex items-center space-x-4 mb-4">

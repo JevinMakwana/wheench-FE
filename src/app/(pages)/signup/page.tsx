@@ -32,7 +32,7 @@ export default function SignUp() {
         try {
             await signUp(data);
             //   toast.success('Account created successfully!');
-            navigate.push('/');
+            navigate.push('/login');
         } catch (error) {
             console.error('Failed to create account');
         }

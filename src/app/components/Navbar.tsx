@@ -33,7 +33,7 @@ export default function Navbar() {
                         {user ? (
                             <>
                                 <Link
-                                    href="/create-trip"
+                                    href="/trip/create-trip"
                                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                                 >
                                     Host a Trip

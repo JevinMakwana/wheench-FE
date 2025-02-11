@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
       }, []);
 
-    const storeUserInfo = (data:any) => {
+    const storeUserInfo = (data:any) => {   
         if (data.token) {
             cookiesSetItem("authToken", data.token);
         }
