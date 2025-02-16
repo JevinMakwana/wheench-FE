@@ -1,5 +1,4 @@
 'use client'
-import RecipeReviewCard from "./components/live-trips";
 import Navbar from "./components/Navbar";
 import SeachBar from "./components/searchbar";
 import { MapPin, Calendar, Users, IndianRupee } from 'lucide-react';
@@ -39,8 +38,7 @@ export default function Home() {
         setLoading(false);
         throw new Error("Request failed");
       }
-      setTrips(liveTrips.data.trips);
-      console.log("liveTrips----->", format(new Date(parseISO(liveTrips.data.trips[0].takeofftime)), "dd-MM-yyyy"));  
+      setTrips(liveTrips?.data?.trips);
       setLoading(false);
     }
     getTrips();
@@ -67,7 +65,7 @@ export default function Home() {
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900">Find Your Next Ride</h1>
             <p className="mt-2 text-lg text-gray-600">
-              Connect with drivers heading your way
+              Connect with Hosts heading your way
             </p>
           </div>
         </div>
@@ -104,7 +102,7 @@ export default function Home() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-2 text-gray-600">
                     <Users className="h-5 w-5" />
-                    <span>{trip.available_seats} seats left</span>
+                    <span>{+trip.totalseats - +trip.guestIds?.length} seats left</span>
                   </div>
 
                   <div className="flex items-center space-x-1 text-green-600 font-semibold">

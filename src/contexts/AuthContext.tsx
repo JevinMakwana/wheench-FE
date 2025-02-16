@@ -1,6 +1,8 @@
 'use client'
 import { cookiesSetItem } from '@/utils/commons';
+import { message } from 'antd';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 // import { supabase } from '../lib/supabase';
 // import type { User } from '@supabase/supabase-js';
@@ -18,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<null>(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useRouter();
 
       useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -29,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const storeUserInfo = (data:any) => {   
         if (data.token) {
-            cookiesSetItem("authToken", data.token);
+            localStorage.setItem("authToken", data.token);
         }
         localStorage.setItem('user', JSON.stringify(data.user)); // Store user details in localStorage
         setUser(data.user); // Update user state
@@ -42,14 +45,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email,
                 password
             });
-
+            console.log("response----", response);
             if (response.data.token) {
                 storeUserInfo(response.data);
+                navigate.push('/');
+            }else {
+                message.error("User not found");
             }
+            setLoading(false);
+            return response;
         } catch (error) {
+            setLoading(false);
+            // message.error(`Login error: ${error}`);
             console.error("Login error:", error);
         }
-        setLoading(false);
     };
 
     const signUp = async ({ email, full_name, gender, password, phone, username }: { email: string; full_name: string; gender: string; password: string; phone: string; username: string }) => {
@@ -65,27 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (response.data.token) {
             storeUserInfo(response.data);
         }
-
-        // const { error: signUpError, data } = await supabase.auth.signUp({ 
-        //   email, 
-        //   password,
-        //   options: {
-        //     data: { full_name: fullName }
-        //   }
-        // });
-        // if (signUpError) throw signUpError;
-
-        // if (data.user) {
-        //   const { error: profileError } = await supabase
-        //     .from('users')
-        //     .insert([{ id: data.user.id, email, full_name: fullName }]);
-
-        //   if (profileError) throw profileError;
-        // }
     };
 
     const signOut = async () => {
-        cookiesSetItem("token", "");
+        localStorage.removeItem("authToken");
         localStorage.removeItem("user");
         setUser(null);
     };

@@ -1,18 +1,22 @@
 "use client";
 
 import { Booking, Trip } from "@/app/types";
+import { Button, message } from "antd";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
-import { Calendar, Car, IndianRupee, MapPin, User } from "lucide-react";
-import { useParams } from "next/navigation";
+import { Calendar, Car, IndianRupee, MapPin, User, Users } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const TripDetails = () => {
     const { tripId } = useParams<{ tripId: string }>();
+    const router = useRouter();
+
     const [tripDetails, setTripDetails] = useState<Trip | any>();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(false);
+    const [parsedUserId, setParsedUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchTripDetails = async () => {
@@ -32,7 +36,54 @@ const TripDetails = () => {
         fetchTripDetails();
     }, [tripId]);
 
-    const handleBooking = async () => {}
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+        if (user) {
+            const parsedUser = JSON.parse(user);
+            setParsedUserId(parsedUser?._id || null);
+        }
+    }, []);
+
+    const handleBooking = async () => {
+        if (!parsedUserId) {
+            message.error("User not found. Please log in.");
+            return;
+        }
+
+        try {
+            setBooking(true); // Disable button while booking
+            console.log("parsedUserId:", parsedUserId);
+
+            const TOKEN = localStorage.getItem("authToken");
+            if (!TOKEN) {
+                message.error("Authentication failed. Please log in again.");
+                return;
+            }
+
+            const headers = { Authorization: `Bearer ${TOKEN}` };
+            console.log("Trip ID to be booked:", tripId);
+
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/v1/guest/book`,
+                { tripId },
+                { headers }
+            );
+
+            console.log("handleBooking response", response);
+
+            if (response.data.success) {
+                message.success(response.data.message);
+                router.push("/"); // Redirect after successful booking
+            } else {
+                message.error(response.data.message || "Booking failed. Please try again.");
+            }
+        } catch (error: any) {
+            console.error("Error booking trip:", error);
+            message.error(error.response?.data?.message || "Something went wrong.");
+        } finally {
+            setBooking(false); // Re-enable button
+        }
+    };
 
     if (loading) {
         return (
@@ -41,14 +92,14 @@ const TripDetails = () => {
             </div>
         );
     }
-
+    console.log('tripDetails', tripDetails)
     if (!tripDetails) {
         return <div>Trip not found</div>;
     }
 
-    // const isHost = user?.id === trip.host_id;
     // const hasBooked = bookings.some(booking => booking.guest_id === user?.id);
-    const canBook = true /* !isHost && !hasBooked && trip.available_seats > 0;*/
+    const isHost = parsedUserId === tripDetails.hostId;
+    const canBook = (parsedUserId && !isHost && tripDetails?.totalseats > tripDetails.guestIds?.length && !tripDetails.guestIds?.some((guest: any) => guest._id === parsedUserId)) || false;
 
     return (
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -63,7 +114,7 @@ const TripDetails = () => {
                         </div>
                         <div className="flex items-center space-x-2 text-gray-600">
                             <Calendar className="h-5 w-5" />
-                            <span>{format(new Date(parseISO(tripDetails.takofftime)), "dd-MM-yyyy")}</span>
+                            <span>{format(new Date(parseISO(tripDetails.takeofftime)), "dd-MM-yyyy")}</span>
 
                         </div>
                         <div className="flex items-center space-x-2 text-gray-600">
@@ -74,6 +125,10 @@ const TripDetails = () => {
                             <Car className="h-5 w-5" />
                             <span>{tripDetails.car}</span>
                         </div>
+                        <div className="flex items-center space-x-2 text-gray-600">
+                            <Users className="h-5 w-5" />
+                            <span>{+tripDetails.totalseats - +tripDetails.guestIds?.length} seats left out of total {+tripDetails.totalseats} seats</span>
+                        </div>
                     </div>
 
                     <div>
@@ -81,33 +136,41 @@ const TripDetails = () => {
                             <h3 className="font-medium text-gray-900 mb-2">Host Details</h3>
                             <div className="flex items-center space-x-2 text-gray-600">
                                 <User className="h-5 w-5" />
-                                <span>{tripDetails.host?.full_name}</span>
+                                <span>{tripDetails.hostInfo?.full_name}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="mb-8">
-                    <h3 className="font-medium text-gray-900 mb-4">Passengers ({bookings.length})</h3>
+                    <h3 className="font-medium text-gray-900 mb-4">Passengers ({tripDetails.guestIds?.length})</h3>
                     <div className="space-y-2">
-                        {bookings.map((booking) => (
-                            <div key={booking.id} className="flex items-center space-x-2 text-gray-600">
+                        {tripDetails.guestIds?.map((guest: any) => (
+                            <div key={guest._id} className="flex items-center space-x-2 text-gray-600">
                                 <User className="h-5 w-5" />
-                                <span>{booking.guest?.full_name}</span>
+                                <span>{guest.full_name}</span>
                             </div>
                         ))}
                     </div>
                 </div>
-
-                {canBook && (
-                    <button
+                
+                {parsedUserId && tripDetails?._id !== parsedUserId && (
+                    <Button
+                        type="primary"
+                        size="large"
+                        loading={booking}
+                        className={`w-full md:w-auto px-6 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 
+                            ${canBook
+                                ? "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500"
+                                : "bg-gray-400 text-gray-200 cursor-not-allowed border-none"
+                            }`}
+                        disabled={!canBook}
                         onClick={handleBooking}
-                        disabled={booking}
-                        className="w-full md:w-auto px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                     >
-                        {booking ? 'Booking...' : 'Book Seat'}
-                    </button>
+                        {booking ? 'Booking...' : 'Book a Seat'}
+                    </Button>
                 )}
+
             </div>
         </div>
     );
