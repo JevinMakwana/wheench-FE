@@ -1,5 +1,4 @@
 'use client'
-import RecipeReviewCard from "./components/live-trips";
 import Navbar from "./components/Navbar";
 import SeachBar from "./components/searchbar";
 import { MapPin, Calendar, Users, IndianRupee } from 'lucide-react';
