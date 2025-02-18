@@ -47,31 +47,23 @@ export default function Navbar() {
                     <div className="flex items-center space-x-4">
                         {user ? (
                             <>
-                                {/* {!userData.hostingTripId
-                                } */}
                                 <Button
-    type="primary"
-    size="large"
-    className={`w-full md:w-auto px-6 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 
-        ${!userData?.hostingTripId 
-            ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500" 
-            : "bg-gray-400 text-gray-200 cursor-not-allowed border-none"
-        }`}
-    disabled={!!userData?.hostingTripId}
-    onClick={() => {
-        if (!userData?.hostingTripId) {
-            router.push('/trip/create-trip');
-        }
-    }}
->
-    Host a Trip
-</Button>
-                                {/* <Link
-                                    href="/trip/create-trip"
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                                    type="primary"
+                                    size="large"
+                                    className={`w-full md:w-auto px-6 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 
+                                        ${!userData?.hostingTripId
+                                            ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+                                            : "bg-gray-400 text-gray-200 cursor-not-allowed border-none"
+                                        }`}
+                                    disabled={!!userData?.hostingTripId}
+                                    onClick={() => {
+                                        if (!userData?.hostingTripId) {
+                                            router.push('/trip/create-trip');
+                                        }
+                                    }}
                                 >
                                     Host a Trip
-                                </Link> */}
+                                </Button>
                                 <Popover placement="bottom" /*title={text}*/ content={userPopOverContent}>
                                     <Link href="/profile" className="text-gray-600 hover:text-gray-900">
                                         <UserCircle className="h-6 w-6" />

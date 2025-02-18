@@ -1,6 +1,8 @@
 "use client";
 
 import { Booking, Trip } from "@/app/types";
+import { useAuth } from "@/contexts/AuthContext";
+import useGetApi from "@/hooks/useGetApi";
 import { Button, message } from "antd";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
@@ -11,33 +13,17 @@ import { useEffect, useState } from "react";
 const TripDetails = () => {
     const { tripId } = useParams<{ tripId: string }>();
     const router = useRouter();
-
-    const [tripDetails, setTripDetails] = useState<Trip | any>();
-    const [bookings, setBookings] = useState<Booking[]>([]);
-    const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(false);
     const [parsedUserId, setParsedUserId] = useState<string | null>(null);
+    const { user } = useAuth();
+
+    const {
+        isLoading: loading,
+        error: tripDetailsError,
+        data: tripDetails
+    } = useGetApi(`trips/${tripId}`);
 
     useEffect(() => {
-        const fetchTripDetails = async () => {
-            const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-            console.log('Base URL:', baseURL);
-
-            try {
-                const response = await axios.get(`${baseURL}/v1/trips/${tripId}`);
-                setTripDetails(response.data);
-                setLoading(false);
-                console.log('response->>', response.data);
-            } catch (error) {
-                console.error('Error fetching trip details:', error);
-            }
-        };
-
-        fetchTripDetails();
-    }, [tripId]);
-
-    useEffect(() => {
-        const user = localStorage.getItem("user");
         if (user) {
             const parsedUser = JSON.parse(user);
             setParsedUserId(parsedUser?._id || null);

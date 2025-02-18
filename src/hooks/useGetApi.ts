@@ -17,7 +17,7 @@ const useGetApi = (endpoint: string) => {
         setIsLoading(true);
         setError(null);
 
-        const TOKEN = cookiesGetItem("authToken");
+        const TOKEN = localStorage.getItem("authToken");
         // const isExpired = await checkTokenExpiration(TOKEN);
         const isExpired = false;
         if (isExpired) {
@@ -28,13 +28,13 @@ const useGetApi = (endpoint: string) => {
                     Authorization: `Bearer ${TOKEN}`,
                 };
                 const response = await axios.get(
-                    `${process.env.NODE_PUBLIC_BASE_URL}/v1/${dynamicEndpoint ? dynamicEndpoint : endpoint
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/v1/${dynamicEndpoint ? dynamicEndpoint : endpoint
                     }`,
                     {
                         headers,
                     }
                 );
-
+                console.log('res at useGetApi:', response)
                 if (response.status !== 200) {
                     throw new Error("Request failed");
                 }
@@ -56,8 +56,9 @@ const useGetApi = (endpoint: string) => {
     };
 
     useEffect(() => {
+        console.log('useEffect due to endpoint trigerrrrrrrrrred')
         if (endpoint) {
-            fetchData("");
+            fetchData(endpoint);
         }
     }, [endpoint]);
 
@@ -66,7 +67,7 @@ const useGetApi = (endpoint: string) => {
             fetchData(dynamicEndpoint);
         }
     };
-
+    console.log('sentdata from useGetApi:', data)
     return { isLoading, error, data, refetch };
 };
 

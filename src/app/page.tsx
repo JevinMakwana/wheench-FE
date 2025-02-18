@@ -1,57 +1,25 @@
 'use client'
+// import SeachBar from "./components/searchbar";
 import Navbar from "./components/Navbar";
-import SeachBar from "./components/searchbar";
 import { MapPin, Calendar, Users, IndianRupee } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import useGetApi from "@/hooks/useGetApi";
-import axios from "axios";
-import { Trip } from "@/app/types";
-import { cookiesGetItem } from "@/utils/commons";
-
-// interface Trip {
-//   _id: string;
-//   source: string;
-//   destination: string;
-//   car: string;
-
-//   takofftime: string;
-//   available_seats: number;
-//   price: number;
-//   host: {
-//     full_name: string;
-//     avatar_url?: string;
-//   };
-// }
 
 export default function Home() {
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    isLoading: liveTripsDataLoading,
+    error: liveTripsDataError,
+    data: liveTripsData
+  } = useGetApi(`trips`);
 
-  useEffect(() => {
-    // get trips
-    const getTrips = async () => {
-      const liveTrips = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/trips`);
-
-      if (liveTrips.status !== 200) {
-        setLoading(false);
-        throw new Error("Request failed");
-      }
-      setTrips(liveTrips?.data?.trips);
-      setLoading(false);
-    }
-    getTrips();
-  }, []);
-
-  if (loading) {
+  if (liveTripsDataLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
-
 
   return (
     <div>
@@ -70,7 +38,7 @@ export default function Home() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trips.map((trip) => (
+          {liveTripsData?.trips?.length && liveTripsData?.trips?.map((trip:any) => (
             <Link
               key={trip._id}
               href={`/trip/trip-details/${trip._id}`}
@@ -115,7 +83,7 @@ export default function Home() {
           ))}
         </div>
 
-        {trips.length === 0 && (
+        {liveTripsData?.trips?.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No trips available at the moment.</p>
           </div>

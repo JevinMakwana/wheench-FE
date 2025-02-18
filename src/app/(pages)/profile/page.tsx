@@ -1,31 +1,16 @@
 'use client'
-import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
-import axios from "axios";
 import { Card, Spin, Typography, Row, Col, Tag, Space, Divider } from "antd";
+import useGetApi from "@/hooks/useGetApi";
 
 const { Text } = Typography;
 
 const Profile = () => {
-    const [userData, setUserData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const TOKEN = localStorage.getItem("authToken");
-
-    useEffect(() => {
-        const getFreshUser = async () => {
-            try {
-                const headers = { Authorization: `Bearer ${TOKEN}` };
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/user/my-info`, { headers });
-
-                if (response.status === 200) setUserData(response.data.user);
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        getFreshUser();
-    }, []);
+    const {
+        isLoading: loading,
+        error: userDataError,
+        data: userData
+    } = useGetApi('user/my-info');
 
     if (loading) {
         return (
@@ -45,49 +30,49 @@ const Profile = () => {
 
                 <Row gutter={[8, 8]} className="mt-2">
                     <Col span={12}><Text type="secondary">Email:</Text></Col>
-                    <Col span={12}><Text>{userData?.email}</Text></Col>
+                    <Col span={12}><Text>{userData.user?.email}</Text></Col>
 
                     <Col span={12}><Text type="secondary">Username:</Text></Col>
-                    <Col span={12}><Text>{userData?.username}</Text></Col>
+                    <Col span={12}><Text>{userData.user?.username}</Text></Col>
 
                     <Col span={12}><Text type="secondary">Full Name:</Text></Col>
-                    <Col span={12}><Text>{userData?.full_name}</Text></Col>
+                    <Col span={12}><Text>{userData.user?.full_name}</Text></Col>
 
                     <Col span={12}><Text type="secondary">Phone:</Text></Col>
-                    <Col span={12}><Text>{userData?.phone}</Text></Col>
+                    <Col span={12}><Text>{userData.user?.phone}</Text></Col>
                 </Row>
 
-                {userData?.hostingTripId && (
+                {userData.user?.hostingTripId && (
                     <>
                          <Divider />
 
                         <Row justify="space-between" className="mt-3">
                             <Col><Text strong className="text-lg">Hosting Trip</Text></Col>
                             <Col>
-                                <Tag color={userData.hostingTripId.live ? "green" : "red"}>
-                                    {userData.hostingTripId.live ? "Live" : "Inactive"}
+                                <Tag color={userData.user.hostingTripId.live ? "green" : "red"}>
+                                    {userData.user.hostingTripId.live ? "Live" : "Inactive"}
                                 </Tag>
                             </Col>
                         </Row>
 
                         <Row gutter={[8, 8]} className="mt-2">
                             <Col span={12}><Text type="secondary">Source:</Text></Col>
-                            <Col span={12}><Text>{userData.hostingTripId.source}</Text></Col>
+                            <Col span={12}><Text>{userData.user.hostingTripId.source}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Destination:</Text></Col>
-                            <Col span={12}><Text>{userData.hostingTripId.destination}</Text></Col>
+                            <Col span={12}><Text>{userData.user.hostingTripId.destination}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Car:</Text></Col>
-                            <Col span={12}><Text>{userData.hostingTripId.car}</Text></Col>
+                            <Col span={12}><Text>{userData.user.hostingTripId.car}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Seats:</Text></Col>
-                            <Col span={12}><Text>{userData.hostingTripId.totalseats}</Text></Col>
+                            <Col span={12}><Text>{userData.user.hostingTripId.totalseats}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Price:</Text></Col>
-                            <Col span={12}><Text>₹{userData.hostingTripId.price}</Text></Col>
+                            <Col span={12}><Text>₹{userData.user.hostingTripId.price}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Takeoff:</Text></Col>
-                            <Col span={12}><Text>{format(new Date(parseISO(userData.hostingTripId.takeofftime)), "dd-MM-yyyy")}</Text></Col>
+                            <Col span={12}><Text>{format(new Date(parseISO(userData.user.hostingTripId.takeofftime)), "dd-MM-yyyy")}</Text></Col>
                         </Row>
 
                         <Divider />
@@ -95,9 +80,9 @@ const Profile = () => {
                         <Row className="mt-3">
                             <Col span={24}>
                                 <Text strong className="text-sm">Guests:</Text>{" "}
-                                {userData?.hostingTripId.guestIds?.length ? (
+                                {userData.user?.hostingTripId.guestIds?.length ? (
                                     <Space>
-                                        {userData.hostingTripId.guestIds.map((guest: any, index: number) => (
+                                        {userData.user.hostingTripId.guestIds.map((guest: any, index: number) => (
                                             <Tag key={index} color="purple">{guest.username}</Tag>
                                         ))}
                                     </Space>
