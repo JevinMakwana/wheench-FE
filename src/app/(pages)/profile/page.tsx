@@ -30,49 +30,49 @@ const Profile = () => {
 
                 <Row gutter={[8, 8]} className="mt-2">
                     <Col span={12}><Text type="secondary">Email:</Text></Col>
-                    <Col span={12}><Text>{userData.user?.email}</Text></Col>
+                    <Col span={12}><Text>{userData?.email}</Text></Col>
 
                     <Col span={12}><Text type="secondary">Username:</Text></Col>
-                    <Col span={12}><Text>{userData.user?.username}</Text></Col>
+                    <Col span={12}><Text>{userData?.username}</Text></Col>
 
                     <Col span={12}><Text type="secondary">Full Name:</Text></Col>
-                    <Col span={12}><Text>{userData.user?.full_name}</Text></Col>
+                    <Col span={12}><Text>{userData?.full_name}</Text></Col>
 
                     <Col span={12}><Text type="secondary">Phone:</Text></Col>
-                    <Col span={12}><Text>{userData.user?.phone}</Text></Col>
+                    <Col span={12}><Text>{userData?.phone}</Text></Col>
                 </Row>
 
-                {userData.user?.hostingTripId && (
+                {userData?.hostingTripId && (
                     <>
                          <Divider />
 
                         <Row justify="space-between" className="mt-3">
                             <Col><Text strong className="text-lg">Hosting Trip</Text></Col>
                             <Col>
-                                <Tag color={userData.user.hostingTripId.live ? "green" : "red"}>
-                                    {userData.user.hostingTripId.live ? "Live" : "Inactive"}
+                                <Tag color={userData.hostingTripId.live ? "green" : "red"}>
+                                    {userData.hostingTripId.live ? "Live" : "Inactive"}
                                 </Tag>
                             </Col>
                         </Row>
 
                         <Row gutter={[8, 8]} className="mt-2">
                             <Col span={12}><Text type="secondary">Source:</Text></Col>
-                            <Col span={12}><Text>{userData.user.hostingTripId.source}</Text></Col>
+                            <Col span={12}><Text>{userData.hostingTripId.source}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Destination:</Text></Col>
-                            <Col span={12}><Text>{userData.user.hostingTripId.destination}</Text></Col>
+                            <Col span={12}><Text>{userData.hostingTripId.destination}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Car:</Text></Col>
-                            <Col span={12}><Text>{userData.user.hostingTripId.car}</Text></Col>
+                            <Col span={12}><Text>{userData.hostingTripId.car}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Seats:</Text></Col>
-                            <Col span={12}><Text>{userData.user.hostingTripId.totalseats}</Text></Col>
+                            <Col span={12}><Text>{userData.hostingTripId.totalseats}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Price:</Text></Col>
-                            <Col span={12}><Text>₹{userData.user.hostingTripId.price}</Text></Col>
+                            <Col span={12}><Text>₹{userData.hostingTripId.price}</Text></Col>
 
                             <Col span={12}><Text type="secondary">Takeoff:</Text></Col>
-                            <Col span={12}><Text>{format(new Date(parseISO(userData.user.hostingTripId.takeofftime)), "dd-MM-yyyy")}</Text></Col>
+                            <Col span={12}><Text>{format(new Date(parseISO(userData.hostingTripId.takeofftime)), "dd-MM-yyyy")}</Text></Col>
                         </Row>
 
                         <Divider />
@@ -80,9 +80,9 @@ const Profile = () => {
                         <Row className="mt-3">
                             <Col span={24}>
                                 <Text strong className="text-sm">Guests:</Text>{" "}
-                                {userData.user?.hostingTripId.guestIds?.length ? (
+                                {userData?.hostingTripId.guestIds?.length ? (
                                     <Space>
-                                        {userData.user.hostingTripId.guestIds.map((guest: any, index: number) => (
+                                        {userData.hostingTripId.guestIds.map((guest: any, index: number) => (
                                             <Tag key={index} color="purple">{guest.username}</Tag>
                                         ))}
                                     </Space>

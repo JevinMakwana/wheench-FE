@@ -17,7 +17,7 @@ export default function Navbar() {
     const handleSignOut = async () => {
         try {
             await signOut();
-            router.push('/login');
+            router.push('/');
         } catch (error) {
             console.error('Error signing out:', error);
         }
@@ -25,7 +25,7 @@ export default function Navbar() {
 
     useEffect(() => {
         setUserData(user);
-    }, [user]);
+    }, []);
 
     const text = <span></span>;
     const userPopOverContent = (

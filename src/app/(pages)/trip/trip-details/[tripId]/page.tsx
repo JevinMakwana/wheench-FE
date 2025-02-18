@@ -1,68 +1,35 @@
 "use client";
 
-import { Booking, Trip } from "@/app/types";
 import { useAuth } from "@/contexts/AuthContext";
 import useGetApi from "@/hooks/useGetApi";
+import usePostApi from "@/hooks/usePostApi";
 import { Button, message } from "antd";
-import axios from "axios";
 import { format, parseISO } from "date-fns";
 import { Calendar, Car, IndianRupee, MapPin, User, Users } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 
 const TripDetails = () => {
     const { tripId } = useParams<{ tripId: string }>();
-    const router = useRouter();
+    const { postData } = usePostApi();
     const [booking, setBooking] = useState(false);
-    const [parsedUserId, setParsedUserId] = useState<string | null>(null);
-    const { user } = useAuth();
+    const { user } = useAuth() as {user: any};
 
     const {
-        isLoading: loading,
+        isLoading: tripDetailsLoading,
         error: tripDetailsError,
         data: tripDetails
     } = useGetApi(`trips/${tripId}`);
 
-    useEffect(() => {
-        if (user) {
-            const parsedUser = JSON.parse(user);
-            setParsedUserId(parsedUser?._id || null);
-        }
-    }, []);
-
     const handleBooking = async () => {
-        if (!parsedUserId) {
+        if (!user._id) {
             message.error("User not found. Please log in.");
             return;
         }
 
         try {
             setBooking(true); // Disable button while booking
-            console.log("parsedUserId:", parsedUserId);
-
-            const TOKEN = localStorage.getItem("authToken");
-            if (!TOKEN) {
-                message.error("Authentication failed. Please log in again.");
-                return;
-            }
-
-            const headers = { Authorization: `Bearer ${TOKEN}` };
-            console.log("Trip ID to be booked:", tripId);
-
-            const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/v1/guest/book`,
-                { tripId },
-                { headers }
-            );
-
-            console.log("handleBooking response", response);
-
-            if (response.data.success) {
-                message.success(response.data.message);
-                router.push("/"); // Redirect after successful booking
-            } else {
-                message.error(response.data.message || "Booking failed. Please try again.");
-            }
+            await postData(`guest/book`, { tripId }, '/');
         } catch (error: any) {
             console.error("Error booking trip:", error);
             message.error(error.response?.data?.message || "Something went wrong.");
@@ -71,7 +38,7 @@ const TripDetails = () => {
         }
     };
 
-    if (loading) {
+    if (tripDetailsLoading) {
         return (
             <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -83,9 +50,8 @@ const TripDetails = () => {
         return <div>Trip not found</div>;
     }
 
-    // const hasBooked = bookings.some(booking => booking.guest_id === user?.id);
-    const isHost = parsedUserId === tripDetails.hostId;
-    const canBook = (parsedUserId && !isHost && tripDetails?.totalseats > tripDetails.guestIds?.length && !tripDetails.guestIds?.some((guest: any) => guest._id === parsedUserId)) || false;
+    const isHost = user?._id === tripDetails.hostId;
+    const canBook = (user?._id && !isHost && tripDetails?.totalseats > tripDetails.guestIds?.length && !tripDetails.guestIds?.some((guest: any) => guest._id === user._id)) || false;
 
     return (
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -140,7 +106,7 @@ const TripDetails = () => {
                     </div>
                 </div>
                 
-                {parsedUserId && tripDetails?._id !== parsedUserId && (
+                {user?._id && tripDetails?._id !== user._id && (
                     <Button
                         type="primary"
                         size="large"

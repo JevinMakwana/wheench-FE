@@ -1,11 +1,7 @@
 'use client'
-import { cookiesSetItem } from '@/utils/commons';
-import { message } from 'antd';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import usePostApi from '@/hooks/usePostApi';
+import { storeUserInfo } from '@/utils/commons';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-// import { supabase } from '../lib/supabase';
-// import type { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
     user: null;
@@ -18,45 +14,30 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<null>(null);
+    const { postData } = usePostApi();
+    const [user, setUser] = useState<any>();
     const [loading, setLoading] = useState(true);
-    const navigate = useRouter();
 
-      useEffect(() => {
+    useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             setUser(JSON.parse(storedUser)); // Restore user from localStorage
         }
         setLoading(false);
-      }, []);
+    }, []);
 
-    const storeUserInfo = (data:any) => {   
-        if (data.token) {
-            localStorage.setItem("authToken", data.token);
-        }
-        localStorage.setItem('user', JSON.stringify(data.user)); // Store user details in localStorage
-        setUser(data.user); // Update user state
-    }
 
     const signIn = async (email: string, password: string) => {
         setLoading(true);
         try {
-            const response: any = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_LOGIN}`, {
-                email,
-                password
-            });
-            console.log("response----", response);
-            if (response.data.token) {
-                storeUserInfo(response.data);
-                navigate.push('/');
-            }else {
-                message.error("User not found");
+            const response = await postData(`${process.env.NEXT_PUBLIC_LOGIN}`, { email, password }, '/', true)
+            if (response?.token) {
+                storeUserInfo(response);
+                setUser(response.user); // Update user state
             }
             setLoading(false);
-            return response;
         } catch (error) {
             setLoading(false);
-            // message.error(`Login error: ${error}`);
             console.error("Login error:", error);
         }
     };
@@ -70,9 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             phone,
             username,
         }
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_REGISTER}`, payload, { headers: { "Content-Type": "application/json" } })
-        if (response.data.token) {
+
+        const response = await postData(`${process.env.NEXT_PUBLIC_REGISTER}`, payload, '/')
+        if (response?.data?.token) {
             storeUserInfo(response.data);
+            setUser(response.data.user); // Update user state
         }
     };
 

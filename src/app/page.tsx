@@ -38,7 +38,7 @@ export default function Home() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {liveTripsData?.trips?.length && liveTripsData?.trips?.map((trip:any) => (
+          {liveTripsData?.length && liveTripsData?.map((trip:any) => (
             <Link
               key={trip._id}
               href={`/trip/trip-details/${trip._id}`}
@@ -83,7 +83,7 @@ export default function Home() {
           ))}
         </div>
 
-        {liveTripsData?.trips?.length === 0 && (
+        {liveTripsData?.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No trips available at the moment.</p>
           </div>
