@@ -16,7 +16,6 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
-    const navigate = useRouter();
     const { signIn } = useAuth();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema),
@@ -26,9 +25,8 @@ export default function Login() {
         try {
             await signIn(data.email, data.password);
             // toast.success('Logged in successfully!');
-            navigate.push('/');
         } catch (error) {
-            // toast.error('Invalid email or password');
+            console.error('Invalid email or password');
         }
     };
 

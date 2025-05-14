@@ -1,9 +1,7 @@
 'use client'
-import { cookiesSetItem } from '@/utils/commons';
-import axios from 'axios';
+import usePostApi from '@/hooks/usePostApi';
+import { storeUserInfo } from '@/utils/commons';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-// import { supabase } from '../lib/supabase';
-// import type { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
     user: null;
@@ -16,40 +14,32 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<null>(null);
+    const { postData } = usePostApi();
+    const [user, setUser] = useState<any>();
     const [loading, setLoading] = useState(true);
 
-      useEffect(() => {
+    useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             setUser(JSON.parse(storedUser)); // Restore user from localStorage
         }
         setLoading(false);
-      }, []);
+    }, []);
 
-    const storeUserInfo = (data:any) => {   
-        if (data.token) {
-            cookiesSetItem("authToken", data.token);
-        }
-        localStorage.setItem('user', JSON.stringify(data.user)); // Store user details in localStorage
-        setUser(data.user); // Update user state
-    }
 
     const signIn = async (email: string, password: string) => {
         setLoading(true);
         try {
-            const response: any = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_LOGIN}`, {
-                email,
-                password
-            });
-
-            if (response.data.token) {
-                storeUserInfo(response.data);
+            const response = await postData(`${process.env.NEXT_PUBLIC_LOGIN}`, { email, password }, '/', true)
+            if (response?.token) {
+                storeUserInfo(response);
+                setUser(response.user); // Update user state
             }
+            setLoading(false);
         } catch (error) {
+            setLoading(false);
             console.error("Login error:", error);
         }
-        setLoading(false);
     };
 
     const signUp = async ({ email, full_name, gender, password, phone, username }: { email: string; full_name: string; gender: string; password: string; phone: string; username: string }) => {
@@ -61,31 +51,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             phone,
             username,
         }
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/${process.env.NEXT_PUBLIC_REGISTER}`, payload, { headers: { "Content-Type": "application/json" } })
-        if (response.data.token) {
+
+        const response = await postData(`${process.env.NEXT_PUBLIC_REGISTER}`, payload, '/')
+        if (response?.data?.token) {
             storeUserInfo(response.data);
+            setUser(response.data.user); // Update user state
         }
-
-        // const { error: signUpError, data } = await supabase.auth.signUp({ 
-        //   email, 
-        //   password,
-        //   options: {
-        //     data: { full_name: fullName }
-        //   }
-        // });
-        // if (signUpError) throw signUpError;
-
-        // if (data.user) {
-        //   const { error: profileError } = await supabase
-        //     .from('users')
-        //     .insert([{ id: data.user.id, email, full_name: fullName }]);
-
-        //   if (profileError) throw profileError;
-        // }
     };
 
     const signOut = async () => {
-        cookiesSetItem("token", "");
+        localStorage.removeItem("authToken");
         localStorage.removeItem("user");
         setUser(null);
     };

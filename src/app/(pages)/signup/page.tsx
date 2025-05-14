@@ -3,8 +3,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-// import { useNavigate } from 'react-router-dom';
-// import { toast } from 'react-hot-toast';
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,7 +30,6 @@ export default function SignUp() {
         try {
             await signUp(data);
             //   toast.success('Account created successfully!');
-            navigate.push('/login');
         } catch (error) {
             console.error('Failed to create account');
         }

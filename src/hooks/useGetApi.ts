@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
-// import { message } from "antd";
-import { /*checkTokenExpiration,*/ cookiesGetItem } from "@/utils/commons";
 import { useRouter } from "next/navigation";
+import { message } from "antd";
 
 const useGetApi = (endpoint: string) => {
     const history = useRouter();
@@ -12,12 +11,10 @@ const useGetApi = (endpoint: string) => {
     const [data, setData] = useState<any>([]);
 
     const fetchData = async (dynamicEndpoint: string) => {
-        console.log('dynamicEndpoint------>', dynamicEndpoint)
-        console.log('endpoint------>', endpoint)
         setIsLoading(true);
         setError(null);
 
-        const TOKEN = cookiesGetItem("authToken");
+        const TOKEN = localStorage.getItem("authToken");
         // const isExpired = await checkTokenExpiration(TOKEN);
         const isExpired = false;
         if (isExpired) {
@@ -28,20 +25,24 @@ const useGetApi = (endpoint: string) => {
                     Authorization: `Bearer ${TOKEN}`,
                 };
                 const response = await axios.get(
-                    `${process.env.NODE_PUBLIC_BASE_URL}/v1/${dynamicEndpoint ? dynamicEndpoint : endpoint
-                    }`,
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/v1/${dynamicEndpoint ? dynamicEndpoint : endpoint}`,
                     {
                         headers,
                     }
                 );
-
                 if (response.status !== 200) {
                     throw new Error("Request failed");
                 }
 
-                const responseData = response.data;
-                setData(responseData);
                 setIsLoading(false);
+                if (response.data?.statusText === "fail") {
+                    message.error(response.data?.message);
+                    return;
+                }
+
+                const responseData = response.data?.data;
+                setData(responseData);
+                return;
             } catch (error: any) {
                 if (error.code !== "ERR_NETWORK") {
                     if (error.response.status === 401) {
@@ -57,7 +58,7 @@ const useGetApi = (endpoint: string) => {
 
     useEffect(() => {
         if (endpoint) {
-            fetchData("");
+            fetchData(endpoint);
         }
     }, [endpoint]);
 
@@ -66,7 +67,6 @@ const useGetApi = (endpoint: string) => {
             fetchData(dynamicEndpoint);
         }
     };
-
     return { isLoading, error, data, refetch };
 };
 
