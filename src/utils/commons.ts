@@ -16,3 +16,10 @@ export const storeUserInfo = (data: any) => {
   }
   localStorage.setItem('user', JSON.stringify(data.user)); // Store user details in localStorage
 }
+
+export const removeHostingTrip = () => {
+  const userString = localStorage.getItem('user');
+  const user = userString ? JSON.parse(userString) : null;
+  user && delete user.hostingTripId
+  storeUserInfo({user});
+}

@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             username,
         }
 
-        const response = await postData(`${process.env.NEXT_PUBLIC_REGISTER}`, payload, '/')
+        const response = await postData(`${process.env.NEXT_PUBLIC_REGISTER}`, payload, '/', true);
         if (response?.data?.token) {
             storeUserInfo(response.data);
             setUser(response.data.user); // Update user state

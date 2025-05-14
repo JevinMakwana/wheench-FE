@@ -2,6 +2,8 @@
 import { format, parseISO } from "date-fns";
 import { Card, Spin, Typography, Row, Col, Tag, Space, Divider } from "antd";
 import useGetApi from "@/hooks/useGetApi";
+import usePostApi from "@/hooks/usePostApi";
+import { removeHostingTrip, storeUserInfo } from "@/utils/commons";
 
 const { Text } = Typography;
 
@@ -11,6 +13,15 @@ const Profile = () => {
         error: userDataError,
         data: userData
     } = useGetApi('user/my-info');
+
+    const { postData } = usePostApi();
+
+    userData && storeUserInfo({user:userData})
+
+    const handleCompleteTrip = async () => {
+        removeHostingTrip();
+        const res = await postData(`${process.env.NEXT_PUBLIC_COMPLETE_THE_TRIP}`, null, '/profile', false);
+    }
 
     if (loading) {
         return (
@@ -44,7 +55,7 @@ const Profile = () => {
 
                 {userData?.hostingTripId && (
                     <>
-                         <Divider />
+                        <Divider />
 
                         <Row justify="space-between" className="mt-3">
                             <Col><Text strong className="text-lg">Hosting Trip</Text></Col>
@@ -91,6 +102,16 @@ const Profile = () => {
                                 )}
                             </Col>
                         </Row>
+
+                        <Row className="mt-3">
+                            <button
+                                type="submit"
+                                onClick={handleCompleteTrip}
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                            >
+                                {false ? 'Completing the trip...' : 'Complete The Trip'}
+                            </button>
+                        </Row>
                     </>
                 )}
             </Card>
@@ -99,115 +120,3 @@ const Profile = () => {
 }
 
 export default Profile;
-
-
-// 'use client'
-// import { useEffect, useState } from "react";
-// import { format, parseISO } from "date-fns";
-// import axios from "axios";
-// import { Card, Spin, Typography, Row, Col, List, Space, Divider } from "antd";
-
-// const { Title, Text } = Typography;
-
-// const Profile = () => {
-//     const [userData, setUserData] = useState<any>(null);
-//     const [loading, setLoading] = useState(true);
-//     const TOKEN = localStorage.getItem("authToken");
-
-//     useEffect(() => {
-//         const getFreshUser = async () => {
-//             try {
-//                 const headers = { Authorization: `Bearer ${TOKEN}` };
-//                 const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/v1/user/my-info`, { headers });
-
-//                 if (response.status === 200) {
-//                     setUserData(response.data.user);
-//                 } else {
-//                     throw new Error("Request failed for fetching user info");
-//                 }
-//             } catch (error) {
-//                 console.error("Error fetching user data:", error);
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-//         getFreshUser();
-//     }, []);
-
-//     if (loading) {
-//         return (
-//             <div className="flex justify-center items-center h-64">
-//                 <Spin size="large" />
-//             </div>
-//         );
-//     }
-
-//     return (
-//         <div className="max-w-lg mx-auto mt-6">
-//             <Card className="shadow-md rounded-md">
-//                 <Title level={4} className="text-center">Profile</Title>
-//                 <Divider />
-
-//                 <Row gutter={[16, 8]}>
-//                     <Col span={12}><Text strong>Email:</Text></Col>
-//                     <Col span={12}><Text>{userData?.email}</Text></Col>
-
-//                     <Col span={12}><Text strong>Username:</Text></Col>
-//                     <Col span={12}><Text>{userData?.username}</Text></Col>
-
-//                     <Col span={12}><Text strong>Full Name:</Text></Col>
-//                     <Col span={12}><Text>{userData?.full_name}</Text></Col>
-
-//                     <Col span={12}><Text strong>Phone:</Text></Col>
-//                     <Col span={12}><Text>{userData?.phone}</Text></Col>
-//                 </Row>
-
-//                 {userData?.hostingTripId && (
-//                     <>
-//                         <Divider />
-//                         <Title level={5}>Hosted Trip</Title>
-
-//                         <Row gutter={[16, 8]}>
-//                             <Col span={12}><Text strong>Source:</Text></Col>
-//                             <Col span={12}><Text>{userData.hostingTripId.source}</Text></Col>
-
-//                             <Col span={12}><Text strong>Destination:</Text></Col>
-//                             <Col span={12}><Text>{userData.hostingTripId.destination}</Text></Col>
-
-//                             <Col span={12}><Text strong>Price:</Text></Col>
-//                             <Col span={12}><Text>₹{userData.hostingTripId.price}</Text></Col>
-
-//                             <Col span={12}><Text strong>Live:</Text></Col>
-//                             <Col span={12}><Text>{userData.hostingTripId.live ? "Yes" : "No"}</Text></Col>
-
-//                             <Col span={12}><Text strong>Car:</Text></Col>
-//                             <Col span={12}><Text>{userData.hostingTripId.car}</Text></Col>
-
-//                             <Col span={12}><Text strong>Seats:</Text></Col>
-//                             <Col span={12}><Text>{userData.hostingTripId.totalseats}</Text></Col>
-
-//                             <Col span={12}><Text strong>Takeoff:</Text></Col>
-//                             <Col span={12}>
-//                                 <Text>{format(new Date(parseISO(userData.hostingTripId.takeofftime)), "dd-MM-yyyy")}</Text>
-//                             </Col>
-//                         </Row>
-
-//                         <Divider />
-//                         <Title level={5}>Guests</Title>
-//                         {userData?.hostingTripId.guestIds?.length ? (
-//                             <List
-//                                 size="small"
-//                                 dataSource={userData.hostingTripId.guestIds}
-//                                 renderItem={(guest: any) => <List.Item>{guest.username}</List.Item>}
-//                             />
-//                         ) : (
-//                             <Text type="secondary">No guests joined yet</Text>
-//                         )}
-//                     </>
-//                 )}
-//             </Card>
-//         </div>
-//     );
-// }
-
-// export default Profile;
